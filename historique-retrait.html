@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Historique des retraits</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Variables globales */
+        :root {
+            --bg-image: url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg');
+            --section-bg-image: url('https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg');
+            
+            /* Couleurs */
+            --text-color: #ffffff;
+            --text-secondary: #dddddd;
+            --amount-color: #ff6b6b;
+            --fees-color: #ffd700;
+            --success-color: #4CAF50;
+            --net-amount-color: #00ff9d;
+            
+            /* Espacements */
+            --spacing-sm: 10px;
+            --spacing-md: 20px;
+            --spacing-lg: 30px;
+            
+            /* Border radius */
+            --radius-sm: 8px;
+            --radius-md: 15px;
+            --radius-lg: 20px;
+        }
+
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        var(--bg-image) center/cover fixed;
+            color: var(--text-color);
+            padding: var(--spacing-md);
+        }
+
+        .container {
+            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
+                        var(--section-bg-image) center/cover;
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 800px;
+            margin: var(--spacing-md) auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            backdrop-filter: blur(5px);
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--success-color),
+                transparent
+            );
+        }
+
+        .history-item {
+            background: rgba(0, 0, 0, 0.6);
+            margin-bottom: var(--spacing-md);
+            padding: 25px;
+            border-radius: var(--radius-md);
+            transition: transform 0.3s ease,
+                        background-color 0.3s ease,
+                        box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .amount {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--amount-color);
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .amount::before {
+            content: '\f068';
+            font-family: 'Font Awesome 6 Free';
+            margin-right: var(--spacing-sm);
+            font-size: 1rem;
+        }
+
+        .fees {
+            color: var(--fees-color);
+            font-size: 1.1rem;
+            margin: var(--spacing-sm) 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .fees::before {
+            content: '\f0d6';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Nouveau style pour le montant net */
+        .net-amount {
+            color: var(--net-amount-color);
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: var(--spacing-sm) 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .net-amount::before {
+            content: '\f155';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+        }
+
+        .amount-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(76, 175, 80, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .status.completed {
+            background: rgba(76, 175, 80, 0.3);
+            color: var(--success-color);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .date {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .date::before {
+            content: '\f017';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: var(--spacing-sm);
+            color: var(--text-secondary);
+        }
+
+        .no-history {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-md);
+            margin: var(--spacing-md) 0;
+            backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --spacing-lg: 20px;
+                --spacing-md: 15px;
+                --spacing-sm: 8px;
+            }
+
+            .container {
+                margin: var(--spacing-sm);
+                padding: var(--spacing-md);
+            }
+
+            .history-item {
+                padding: var(--spacing-md);
+            }
+
+            .amount, .net-amount {
+                font-size: 1.2rem;
+            }
+
+            .fees {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content-wrapper">
+            <h1>Mes historique des fonds </h1>
+            <div id="history-list">
+                <!-- Les éléments d'historique seront ajoutés ici dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+    import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
+        authDomain: "coke-eea48.firebaseapp.com",
+        databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
+        projectId: "coke-eea48",
+        storageBucket: "coke-eea48.firebasestorage.app",
+        messagingSenderId: "217366074971",
+        appId: "1:217366074971:web:948bdc5baeeea93fac117e"
+    };
+
+    // Initialisation Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    // Fonctions utilitaires
+    function formatAmount(amount) {
+        return amount.toLocaleString('fr-FR') + ' FCFA';
+    }
+
+    function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // Calcul du montant net
+    function calculateNetAmount(amount, fees) {
+        return amount - fees;
+    }
+
+    // Fonction d'affichage de l'historique
+    function displayWithdrawalHistory(history) {
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = '';
+
+        if (!history || Object.keys(history).length === 0) {
+            historyList.innerHTML = `
+                <div class="no-history">
+                    <i class="fas fa-history"></i> 
+                    Aucun historique de retrait
+                </div>`;
+            return;
+        }
+
+        // Tri et affichage des retraits
+        Object.entries(history)
+            .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+            .forEach(([key, withdrawal]) => {
+                const netAmount = calculateNetAmount(withdrawal.amount, withdrawal.fees);
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="history-header">
+                        <span class="amount">${formatAmount(withdrawal.amount)}</span>
+                        <span class="status ${withdrawal.status.toLowerCase()}">
+                            ${withdrawal.status}
+                        </span>
+                    </div>
+                    <div class="amount-details">
+                        <div class="fees">Frais: ${formatAmount(withdrawal.fees)}</div>
+                        <div class="net-amount">Montant net: ${formatAmount(netAmount)}</div>
+                    </div>
+                    <div class="date">${formatDate(withdrawal.timestamp)}</div>
+                `;
+                historyList.appendChild(historyItem);
+            });
+    }
+
+    // Gestion de l'authentification
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const historyRef = ref(database, `users/${user.uid}/withdrawalHistory`);
+            onValue(historyRef, (snapshot) => {
+                const history = snapshot.val();
+                displayWithdrawalHistory(history);
+            });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+</script>
+</body>
+</html>
