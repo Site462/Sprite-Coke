@@ -670,6 +670,73 @@
             document.getElementById('signupTelephone').maxLength = signupMaxLength;
             document.getElementById('signupTelephone').placeholder = `Numéro de téléphone (${signupMaxLength} chiffres)`;
         });
+        
+        // Ajouter ce code à ton script existant, après l'initialisation de onAuthStateChanged
+
+// Fonction pour afficher le code de parrainage sur la page
+function displayReferralCode() {
+    const auth = window.auth;
+    const database = window.database;
+    
+    // Vérifier si l'utilisateur est connecté
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Récupérer les données de l'utilisateur depuis la base de données
+            get(ref(database, 'users/' + user.uid)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    
+                    // Récupérer le code de parrainage
+                    const referralCode = userData.referralCode;
+                    
+                    // Sélectionner l'élément qui doit afficher le code
+                    const referralCodeElement = document.getElementById('userReferralCode');
+                    
+                    // Si l'élément existe, afficher le code
+                    if (referralCodeElement) {
+                        referralCodeElement.textContent = referralCode;
+                    }
+                    
+                    // Si tu as un bouton pour copier le code, tu peux aussi l'activer ici
+                    const copyButton = document.getElementById('copyReferralCode');
+                    if (copyButton) {
+                        copyButton.addEventListener('click', () => {
+                            navigator.clipboard.writeText(referralCode)
+                                .then(() => {
+                                    // Afficher un message de confirmation ou changer le texte du bouton temporairement
+                                    const originalText = copyButton.textContent;
+                                    copyButton.textContent = 'Copié !';
+                                    setTimeout(() => {
+                                        copyButton.textContent = originalText;
+                                    }, 2000);
+                                })
+                                .catch(err => {
+                                    console.error('Erreur lors de la copie: ', err);
+                                });
+                        });
+                    }
+                }
+            }).catch((error) => {
+                console.error("Erreur lors de la récupération des données utilisateur: ", error);
+            });
+        } else {
+            console.log('Utilisateur non connecté');
+            // Rediriger vers la page de connexion si nécessaire
+        }
+    });
+}
+
+// Appeler cette fonction lorsque la page est chargée
+document.addEventListener('DOMContentLoaded', () => {
+    // Code existant...
+    
+    // Si la page actuelle est celle qui contient la section de code de parrainage
+    if (window.location.pathname.includes('accueil.html') || 
+        window.location.pathname.includes('profil.html') || 
+        document.getElementById('userReferralCode')) {
+        displayReferralCode();
+    }
+});
     </script>
 </body>
 </html>
