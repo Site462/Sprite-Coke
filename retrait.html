@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retrait d'argent</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -179,13 +180,14 @@
         </form>
     </div>
 
- <script type="module">
+    <script type="module">
     /**
      * Script de gestion des retraits d'argent
      * 
      * Ce script gère l'authentification, la vérification des codes de retrait
      * et le traitement des opérations de retrait d'argent.
      * Limitation à un retrait par jour.
+     * Heures de retrait autorisées: de 9h à 20h.
      */
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -214,7 +216,7 @@
         authDomain: "coke-eea48.firebaseapp.com",
         databaseURL: "https://coke-eea48-default-rtdb.firebaseio.com",
         projectId: "coke-eea48",
-        storageBucket: "coke-eea48.firebasestorage.app",
+        storageBucket: "coke-eea48.firebaseestorage.app",
         messagingSenderId: "217366074971",
         appId: "1:217366074971:web:948bdc5baeeea93fac117e"
     };
@@ -223,12 +225,15 @@
     const MIN_WITHDRAWAL = 1000;
     const MAX_WITHDRAWAL = 850000;
     const FEE_PERCENTAGE = 0.10;
+    const WITHDRAWAL_START_HOUR = 9; // Heure de début des retraits (9h)
+    const WITHDRAWAL_END_HOUR = 20;  // Heure de fin des retraits (20h)
     
     // ======== VARIABLES GLOBALES ========
     let currentBalance = 0;
     let currentUser = null;
     let userWithdrawalConfig = null;
     let canWithdrawToday = true;
+    let isWithdrawalTimeAllowed = false; // Indique si l'heure actuelle permet un retrait
     
     // ======== INITIALISATION DE FIREBASE ========
     const app = initializeApp(firebaseConfig);
@@ -253,6 +258,17 @@
     function showMessage(message, isError = true) {
         const messageElement = document.getElementById('message');
         messageElement.innerHTML = `<div class="${isError ? 'error' : 'success'}">${message}</div>`;
+    }
+    
+    /**
+     * Vérifie si l'heure actuelle est dans la plage autorisée pour les retraits
+     * @returns {boolean} - Vrai si l'heure est valide, faux sinon
+     */
+    function checkWithdrawalTime() {
+        const now = new Date();
+        const currentHour = now.getHours();
+        
+        return currentHour >= WITHDRAWAL_START_HOUR && currentHour < WITHDRAWAL_END_HOUR;
     }
     
     /**
@@ -326,6 +342,13 @@
      */
     async function loadUserData(userId) {
         try {
+            // Vérification des heures de retrait
+            isWithdrawalTimeAllowed = checkWithdrawalTime();
+            if (!isWithdrawalTimeAllowed) {
+                showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`, true);
+                document.getElementById('withdrawal-button').disabled = true;
+            }
+            
             // Chargement de la configuration de retrait
             const configRef = ref(database, `users/${userId}/withdrawalConfig`);
             const configSnapshot = await get(configRef);
@@ -358,7 +381,7 @@
      * Met à jour le résumé du retrait en fonction des entrées utilisateur
      */
     function updateWithdrawalSummary() {
-        if (!canWithdrawToday) {
+        if (!canWithdrawToday || !isWithdrawalTimeAllowed) {
             document.getElementById('withdrawal-button').disabled = true;
             return;
         }
@@ -388,6 +411,9 @@
         if (!currentUser) {
             showMessage("Veuillez vous connecter");
             withdrawalButton.disabled = true;
+        } else if (!isWithdrawalTimeAllowed) {
+            showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`);
+            withdrawalButton.disabled = true;
         } else if (amount < MIN_WITHDRAWAL) {
             showMessage(`Le montant minimum de retrait est de ${formatAmount(MIN_WITHDRAWAL)}`);
             withdrawalButton.disabled = true;
@@ -416,6 +442,11 @@
         
         if (!canWithdrawToday) {
             showMessage("Vous avez déjà effectué un retrait aujourd'hui. Limite: 1 retrait par jour.");
+            return;
+        }
+        
+        if (!isWithdrawalTimeAllowed) {
+            showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`);
             return;
         }
     
@@ -490,8 +521,22 @@
         }
     });
     
+    // Vérification des heures de retrait
+    isWithdrawalTimeAllowed = checkWithdrawalTime();
+    if (!isWithdrawalTimeAllowed) {
+        showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`, true);
+        document.getElementById('withdrawal-button').disabled = true;
+    }
+    
     // Écouteurs pour les champs de saisie
     document.addEventListener('DOMContentLoaded', () => {
+        // Vérification des heures de retrait au chargement de la page
+        isWithdrawalTimeAllowed = checkWithdrawalTime();
+        if (!isWithdrawalTimeAllowed) {
+            showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`, true);
+            document.getElementById('withdrawal-button').disabled = true;
+        }
+        
         document.getElementById('amount').addEventListener('input', updateWithdrawalSummary);
         document.getElementById('withdrawalCode').addEventListener('input', updateWithdrawalSummary);
         document.getElementById('withdrawal-button').addEventListener('click', processWithdrawal);
