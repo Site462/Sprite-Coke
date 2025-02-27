@@ -217,7 +217,7 @@
  <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, update, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+        import { getDatabase, ref, set, get, update, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDIB-raa12rkzqxRhflOMLBwL4hBycTgmo",
@@ -360,7 +360,13 @@
 
                 const transactionsArray = Object.entries(transactions)
                     .map(([id, transaction]) => ({...transaction, id}))
+                    .filter(transaction => transaction.userId === userId) // Filter transactions by userId
                     .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+                if (transactionsArray.length === 0) {
+                    historyList.innerHTML = '<div class="no-records">Aucune transaction trouvée</div>';
+                    return;
+                }
 
                 const fragment = document.createDocumentFragment();
                 let hasNewItems = false;
@@ -404,13 +410,10 @@
                 if (!historyList) return;
                 
                 if (user) {
-                    // Création de la requête avec query et orderByChild
-                    const transactionsRef = query(
-                        ref(db, 'transactions'),
-                        orderByChild('date')
-                    );
+                    // Écoute des changements dans les transactions
+                    // Note: Nous continuons à écouter toutes les transactions mais filtrons dans displayTransactions
+                    const transactionsRef = ref(db, 'transactions');
                     
-                    // Écoute des changements
                     onValue(transactionsRef, (snapshot) => {
                         try {
                             const transactions = snapshot.val();
