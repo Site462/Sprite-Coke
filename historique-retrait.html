@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historique des retraits</title>
     
     <!-- Font Awesome -->
@@ -139,6 +140,7 @@
         .amount::before {
             content: '\f068';
             font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
             margin-right: var(--spacing-sm);
             font-size: 1rem;
         }
@@ -242,6 +244,10 @@
                 padding: var(--spacing-md);
             }
 
+            h1 {
+                font-size: 1.8rem;
+            }
+
             .history-item {
                 padding: var(--spacing-md);
             }
@@ -259,14 +265,18 @@
 <body>
     <div class="container">
         <div class="content-wrapper">
-            <h1>Mes historique des fonds </h1>
+            <h1>Historique des fonds</h1>
             <div id="history-list">
-                <!-- Les éléments d'historique seront ajoutés ici dynamiquement -->
+                <!-- Exemple d'historique -->
+                <div class="history-item">
+                    <div class="history-header">
+                        <div 
+                
+                <!-- Vous pouvez ajouter d'autres éléments d'historique ici -->
             </div>
         </div>
-    </div>
-
-   <script type="module">
+    </div>                    
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
     import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
@@ -281,6 +291,7 @@
         appId: "1:217366074971:web:948bdc5baeeea93fac117e"
     };
 
+
     // Initialisation Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -288,10 +299,12 @@
 
     // Fonctions utilitaires
     function formatAmount(amount) {
+        if (typeof amount !== 'number') amount = Number(amount) || 0;
         return amount.toLocaleString('fr-FR') + ' FCFA';
     }
 
     function formatDate(timestamp) {
+        if (!timestamp) return "Date inconnue";
         const date = new Date(timestamp);
         return date.toLocaleString('fr-FR', {
             day: '2-digit',
@@ -302,9 +315,8 @@
         });
     }
 
-    // Calcul du montant net
     function calculateNetAmount(amount, fees) {
-        return amount - fees;
+        return (Number(amount) || 0) - (Number(fees) || 0);
     }
 
     // Fonction d'affichage de l'historique
@@ -323,7 +335,7 @@
 
         // Tri et affichage des retraits
         Object.entries(history)
-            .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+            .sort(([, a], [, b]) => (b.timestamp || 0) - (a.timestamp || 0))
             .forEach(([key, withdrawal]) => {
                 const netAmount = calculateNetAmount(withdrawal.amount, withdrawal.fees);
                 const historyItem = document.createElement('div');
@@ -331,8 +343,8 @@
                 historyItem.innerHTML = `
                     <div class="history-header">
                         <span class="amount">${formatAmount(withdrawal.amount)}</span>
-                        <span class="status ${withdrawal.status.toLowerCase()}">
-                            ${withdrawal.status}
+                        <span class="status ${withdrawal.status ? withdrawal.status.toLowerCase() : 'unknown'}">
+                            ${withdrawal.status || "Inconnu"}
                         </span>
                     </div>
                     <div class="amount-details">
