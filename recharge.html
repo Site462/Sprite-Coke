@@ -10,7 +10,7 @@
             --secondary-color: #ff4900; /* Mastercard rouge */
             --accent-color: #ff0a00; /* PayPal orange */
             --success-color: #00A650; /* Amex vert */
-            --error-color: https://image.noelshack.com/fichiers/2025/09/3/1740570275-images-9.jpeg; /* Rouge standard pour les erreurs */
+            --error-color: #ff0000; /* Rouge standard pour les erreurs */
             --background-color: #ff0a00;
             --text-color: #ff0a00;
         }
@@ -251,7 +251,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Deposit center  </h1>
+        <h1>Deposit center</h1>
         <form id="rechargeForm">
             <div class="operator-grid">
                 <label class="operator-option">
@@ -265,7 +265,7 @@
                     </div>
                 </label>
                 
-                
+                   
                 
                 <label class="operator-option">
                     <input type="radio" name="operator" value="moov" required>
@@ -274,10 +274,9 @@
                             <circle cx="12" cy="12" r="10" fill="#00A3E0"/>
                             <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">MOOV</text>
                         </svg>
-                        <span>Moov cote d'ivoire</span>
+                        <span>Moov</span>
                     </div>
                 </label>
-                
                 
                 
                 
@@ -291,10 +290,6 @@
                         <span>Orange</span>
                     </div>
                 </label>
-                
-                
-                
-                
                 <label class="operator-option">
                     <input type="radio" name="operator" value="wave" required>
                     <div class="operator-logo">
@@ -349,7 +344,123 @@
 
     <div id="notification" class="notification"></div>
 
-<script type="module">
+    <script>
+        // Attendre que le DOM soit complètement chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer les éléments du formulaire
+            const form = document.getElementById('rechargeForm');
+            const phoneInput = document.getElementById('phone');
+            const amountInput = document.getElementById('amount');
+            const submitButton = document.getElementById('submitButton');
+            const loadingElement = document.querySelector('.loading');
+            const notification = document.getElementById('notification');
+            
+            // Fonctions pour afficher les notifications
+            function showNotification(message, type) {
+                notification.textContent = message;
+                notification.className = 'notification ' + type;
+                notification.style.display = 'block';
+                
+                // Masquer la notification après 3 secondes
+                setTimeout(function() {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Fonction pour valider le numéro de téléphone
+            function validatePhone(phone) {
+                // Accepter uniquement des numéros de téléphone de 8 ou 10 chiffres
+                const phoneRegex = /^\d{8,10}$/;
+                return phoneRegex.test(phone);
+            }
+            
+            // Fonction pour valider le montant
+            function validateAmount(amount) {
+                return amount >= 5000; // Montant minimum 5000 FCFA
+            }
+            
+            // Afficher des erreurs de validation
+            phoneInput.addEventListener('input', function() {
+                const phoneError = document.getElementById('phoneError');
+                if (!validatePhone(this.value) && this.value.length > 0) {
+                    phoneError.textContent = 'Veuillez entrer un numéro de téléphone valide (8 à 10 chiffres)';
+                    phoneError.style.display = 'block';
+                } else {
+                    phoneError.style.display = 'none';
+                }
+            });
+            
+            amountInput.addEventListener('input', function() {
+                const amountError = document.getElementById('amountError');
+                if (!validateAmount(this.value) && this.value.length > 0) {
+                    amountError.textContent = 'Le montant minimum est de 5000 FCFA';
+                    amountError.style.display = 'block';
+                } else {
+                    amountError.style.display = 'none';
+                }
+            });
+            
+            // Gérer la soumission du formulaire
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Empêcher la soumission standard du formulaire
+                
+                // Récupérer les valeurs du formulaire
+                const phone = phoneInput.value.trim();
+                const amount = parseInt(amountInput.value, 10);
+                
+                // Vérifier que les valeurs sont valides
+                let isValid = true;
+                
+                if (!validatePhone(phone)) {
+                    document.getElementById('phoneError').textContent = 'Veuillez entrer un numéro de téléphone valide';
+                    document.getElementById('phoneError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (!validateAmount(amount)) {
+                    document.getElementById('amountError').textContent = 'Le montant minimum est de 5000 FCFA';
+                    document.getElementById('amountError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Vérifier qu'un opérateur est sélectionné
+                const selectedOperator = document.querySelector('input[name="operator"]:checked');
+                if (!selectedOperator) {
+                    showNotification('Veuillez sélectionner un opérateur', 'error-notification');
+                    isValid = false;
+                }
+                
+                // Si tout est valide, procéder au paiement
+                if (isValid) {
+                    // Désactiver le bouton pendant le traitement
+                    submitButton.disabled = true;
+                    
+                    // Afficher l'animation de chargement
+                    loadingElement.style.display = 'flex';
+                    
+                    // Simuler une requête au serveur (à remplacer par votre véritable appel API)
+                    setTimeout(function() {
+                        // Masquer l'animation de chargement
+                        loadingElement.style.display = 'none';
+                        
+                        // Réactiver le bouton
+                        submitButton.disabled = false;
+                        
+                        // Rediriger vers la page de confirmation ou afficher un message de succès
+                        showNotification('Paiement en cours de traitement', 'success');
+                        
+                        // En cas de succès, vous pouvez rediriger vers une page de confirmation
+                        // window.location.href = '/confirmation.html'; 
+                        
+                        // Réinitialiser le formulaire
+                        form.reset();
+                    }, 2000);
+                }
+            });
+        });
+    </script>
+    
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
         import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
@@ -524,5 +635,5 @@
             }
         });
     </script>
-    </body>
-</html> 
+</body>
+</html>
