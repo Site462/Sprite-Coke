@@ -323,9 +323,9 @@
 
             <div class="form-group">
                 <label for="amount">Montant</label>
-                <input type="number" id="amount" name="amount" min="5000" 
+                <input type="number" id="amount" name="amount" min="1" 
                        placeholder="Veuillez saisir le montant de votre paiement" required>
-                <span class="help-text">minimum deposit 5000 FCFA </span>
+                <span class="help-text">montant </span>
                 <div id="amountError" class="error"></div>
             </div>
 
@@ -376,7 +376,7 @@
             
             // Fonction pour valider le montant
             function validateAmount(amount) {
-                return amount >= 5000; // Montant minimum 5000 FCFA
+                return amount >= 1; // Montant minimum 5000 FCFA
             }
             
             // Afficher des erreurs de validation
@@ -393,7 +393,7 @@
             amountInput.addEventListener('input', function() {
                 const amountError = document.getElementById('amountError');
                 if (!validateAmount(this.value) && this.value.length > 0) {
-                    amountError.textContent = 'Le montant minimum est de 5000 FCFA';
+                    amountError.textContent = 'Le montant minimum est de 1 FCFA';
                     amountError.style.display = 'block';
                 } else {
                     amountError.style.display = 'none';
