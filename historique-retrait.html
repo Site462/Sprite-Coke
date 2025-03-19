@@ -267,7 +267,12 @@
         <div class="content-wrapper">
             <h1>Historique des fonds</h1>
             <div id="history-list">
-                <!-- Les éléments d'historique seront ajoutés ici dynamiquement -->
+                <!-- Exemple d'historique -->
+                <div class="history-item">
+                    <div class="history-header">
+                        <div 
+                
+                <!-- Vous pouvez ajouter d'autres éléments d'historique ici -->
             </div>
         </div>
     </div>                    
@@ -300,23 +305,8 @@
 
     function formatDate(timestamp) {
         if (!timestamp) return "Date inconnue";
-        
-        // Récupérer la date du retrait depuis Firebase
-        const withdrawalDate = new Date(timestamp);
-        
-        // Récupérer la date actuelle
-        const currentDate = new Date();
-        
-        // Créer une nouvelle date avec la date du retrait mais l'heure locale actuelle
-        const localizedDate = new Date(
-            withdrawalDate.getFullYear(),
-            withdrawalDate.getMonth(),
-            withdrawalDate.getDate(),
-            currentDate.getHours(),
-            currentDate.getMinutes()
-        );
-        
-        return localizedDate.toLocaleString('fr-FR', {
+        const date = new Date(timestamp);
+        return date.toLocaleString('fr-FR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
