@@ -232,32 +232,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* Ajout de styles pour les options de date */
-        .date-options {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-md);
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: var(--spacing-sm);
-        }
-
-        .date-option {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .date-option:hover, .date-option.active {
-            background: rgba(76, 175, 80, 0.3);
-            border-color: var(--success-color);
-        }
-
         @media (max-width: 600px) {
             :root {
                 --spacing-lg: 20px;
@@ -285,10 +259,6 @@
             .fees {
                 font-size: 1rem;
             }
-
-            .date-options {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -296,17 +266,8 @@
     <div class="container">
         <div class="content-wrapper">
             <h1>Historique des fonds</h1>
-            
-            <!-- Ajout des options de format de date -->
-            <div class="date-options">
-                <div class="date-option active" data-format="default">Format par défaut</div>
-                <div class="date-option" data-format="full">Date complète</div>
-                <div class="date-option" data-format="short">Format court</div>
-                <div class="date-option" data-format="time">Heure seulement</div>
-            </div>
-            
             <div id="history-list">
-                <!-- L'historique sera inséré ici dynamiquement -->
+                <!-- Les éléments d'historique seront ajoutés ici dynamiquement -->
             </div>
         </div>
     </div>                    
@@ -325,14 +286,11 @@
         appId: "1:217366074971:web:948bdc5baeeea93fac117e"
     };
 
+
     // Initialisation Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const database = getDatabase(app);
-
-    // Variable pour stocker le format de date actuel
-    let currentDateFormat = "default";
-    let withdrawalHistoryData = null;
 
     // Fonctions utilitaires
     function formatAmount(amount) {
@@ -340,41 +298,31 @@
         return amount.toLocaleString('fr-FR') + ' FCFA';
     }
 
-    function formatDate(timestamp, format = currentDateFormat) {
+    function formatDate(timestamp) {
         if (!timestamp) return "Date inconnue";
-        const date = new Date(timestamp);
         
-        switch (format) {
-            case "full":
-                return date.toLocaleString('fr-FR', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-            case "short":
-                return date.toLocaleString('fr-FR', {
-                    day: 'numeric',
-                    month: 'numeric',
-                    year: '2-digit'
-                });
-            case "time":
-                return date.toLocaleString('fr-FR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            default:
-                return date.toLocaleString('fr-FR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-        }
+        // Récupérer la date du retrait depuis Firebase
+        const withdrawalDate = new Date(timestamp);
+        
+        // Récupérer la date actuelle
+        const currentDate = new Date();
+        
+        // Créer une nouvelle date avec la date du retrait mais l'heure locale actuelle
+        const localizedDate = new Date(
+            withdrawalDate.getFullYear(),
+            withdrawalDate.getMonth(),
+            withdrawalDate.getDate(),
+            currentDate.getHours(),
+            currentDate.getMinutes()
+        );
+        
+        return localizedDate.toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
 
     function calculateNetAmount(amount, fees) {
@@ -383,7 +331,6 @@
 
     // Fonction d'affichage de l'historique
     function displayWithdrawalHistory(history) {
-        withdrawalHistoryData = history;
         const historyList = document.getElementById('history-list');
         historyList.innerHTML = '';
 
@@ -431,23 +378,6 @@
         } else {
             window.location.href = 'login.html';
         }
-    });
-
-    // Gestion des options de format de date
-    document.querySelectorAll('.date-option').forEach(option => {
-        option.addEventListener('click', function() {
-            // Mise à jour de la classe active
-            document.querySelectorAll('.date-option').forEach(el => el.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Mise à jour du format de date
-            currentDateFormat = this.getAttribute('data-format');
-            
-            // Réaffichage de l'historique avec le nouveau format de date
-            if (withdrawalHistoryData) {
-                displayWithdrawalHistory(withdrawalHistoryData);
-            }
-        });
     });
 </script>
 </body>
