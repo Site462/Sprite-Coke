@@ -209,7 +209,6 @@
  * 
  * Ce script gère l'authentification, la vérification des codes de retrait
  * et le traitement des opérations de retrait d'argent.
- * Limitation à un retrait par jour.
  * Heures de retrait autorisées: de 9h à 20h.
  */
 
@@ -227,10 +226,7 @@ import {
     get, 
     push, 
     update, 
-    serverTimestamp,
-    query,
-    orderByChild,
-    limitToLast
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
 // ======== CONFIGURATION ========
@@ -260,7 +256,6 @@ const WITHDRAWAL_END_HOUR = 22;  // Heure de fin des retraits (20h)
 let currentBalance = 0;
 let currentUser = null;
 let userWithdrawalConfig = null;
-let canWithdrawToday = true;
 let isWithdrawalTimeAllowed = false; // Indique si l'heure actuelle permet un retrait
 
 // ======== FONCTIONS UTILITAIRES ========
@@ -365,58 +360,6 @@ async function checkIfUserBlocked(userId) {
 }
 
 /**
- * Vérifie si l'utilisateur a déjà effectué un retrait aujourd'hui
- * @param {string} userId - L'identifiant de l'utilisateur
- */
-async function checkLastWithdrawal(userId) {
-    try {
-        // Vérification du retrait sans utiliser orderByChild pour éviter l'erreur d'index
-        const historyRef = ref(database, `users/${userId}/withdrawalHistory`);
-        const historySnapshot = await get(historyRef);
-        
-        if (historySnapshot.exists()) {
-            const withdrawals = [];
-            historySnapshot.forEach((child) => {
-                withdrawals.push({
-                    ...child.val(),
-                    key: child.key
-                });
-            });
-            
-            // Trier manuellement par timestamp
-            withdrawals.sort((a, b) => {
-                if (!a.timestamp) return 1;
-                if (!b.timestamp) return -1;
-                return b.timestamp - a.timestamp;
-            });
-            
-            // Vérifier le dernier retrait
-            if (withdrawals.length > 0) {
-                const lastWithdrawal = withdrawals[0];
-                
-                if (lastWithdrawal.timestamp) {
-                    const lastWithdrawalDate = new Date(lastWithdrawal.timestamp);
-                    const today = new Date();
-                    
-                    // Vérifier si le dernier retrait est d'aujourd'hui
-                    if (
-                        lastWithdrawalDate.getDate() === today.getDate() &&
-                        lastWithdrawalDate.getMonth() === today.getMonth() &&
-                        lastWithdrawalDate.getFullYear() === today.getFullYear()
-                    ) {
-                        canWithdrawToday = false;
-                        showMessage("Vous avez déjà effectué un retrait aujourd'hui. Limite: 1 retrait par jour.", true);
-                        document.getElementById('withdrawal-button').disabled = true;
-                    }
-                }
-            }
-        }
-    } catch (error) {
-        console.error("Erreur lors de la vérification des retraits:", error);
-    }
-}
-
-/**
  * Charge les données de l'utilisateur depuis Firebase
  * @param {string} userId - L'identifiant de l'utilisateur
  */
@@ -455,9 +398,6 @@ async function loadUserData(userId) {
             document.getElementById('current-balance').textContent = formatAmount(currentBalance);
         }
         
-        // Vérification du dernier retrait
-        await checkLastWithdrawal(userId);
-        
     } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
         showMessage("Erreur lors du chargement des données");
@@ -469,11 +409,6 @@ async function loadUserData(userId) {
  * Met à jour le résumé du retrait en fonction des entrées utilisateur
  */
 function updateWithdrawalSummary() {
-    if (!canWithdrawToday || !isWithdrawalTimeAllowed) {
-        document.getElementById('withdrawal-button').disabled = true;
-        return;
-    }
-    
     const amountInput = document.getElementById('amount');
     const amount = parseFloat(amountInput.value) || 0;
     const withdrawalSummary = document.getElementById('withdrawal-summary');
@@ -535,11 +470,6 @@ async function processWithdrawal() {
         return;
     }
     
-    if (!canWithdrawToday) {
-        showMessage("Vous avez déjà effectué un retrait aujourd'hui. Limite: 1 retrait par jour.");
-        return;
-    }
-    
     if (!isWithdrawalTimeAllowed) {
         showMessage(`Les retraits sont uniquement disponibles de ${WITHDRAWAL_START_HOUR}h à ${WITHDRAWAL_END_HOUR}h`);
         return;
@@ -587,9 +517,6 @@ async function processWithdrawal() {
         };
 
         await update(ref(database), updates);
-
-        // Mise à jour du statut de retrait pour aujourd'hui
-        canWithdrawToday = false;
         
         showMessage("Retrait effectué avec succès! Vous serez redirigé vers l'historique.", false);
         
