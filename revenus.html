@@ -405,7 +405,13 @@
                                     
                                     // S'assurer que toutes les valeurs numériques sont des nombres
                                     const investmentAmount = Number(investment.investment) || 0;
-                                    const cycle = Number(investment.cycle) || 31; // Par défaut, cycle annuel
+                                    
+                                    // MODIFICATION: Vérifier si c'est un VIP 3 avec montant de 90 000 FCFA
+                                    let cycle = Number(investment.cycle) || 31;
+                                    if (investment.level === "VIP 3" && investmentAmount === 90000) {
+                                        cycle = 5; // Cycle de 5 jours pour VIP 3 à 90 000 FCFA
+                                    }
+                                    
                                     const dailyReturnAmount = Number(investment.dailyReturn) || 0;
                                     const totalReturnAmount = Number(investment.totalReturn) || 0;
                                     
