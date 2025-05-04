@@ -190,7 +190,7 @@
                     <span id="requested-amount">0 FCFA</span>
                 </div>
                 <div class="info-item">
-                    <span>Frais (10%):</span>
+                    <span>Frais (5%):</span>
                     <span id="fees-amount">0 FCFA</span>
                 </div>
                 <div class="info-item">
@@ -209,7 +209,7 @@
  * 
  * Ce script gère l'authentification, la vérification des codes de retrait
  * et le traitement des opérations de retrait d'argent.
- * Heures de retrait autorisées: de 9h à 20h.
+ * Heures de retrait autorisées: de 8h à 22h.
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -248,9 +248,9 @@ const database = getDatabase(app);
 // ======== CONSTANTES ========
 const MIN_WITHDRAWAL = 1000;
 const MAX_WITHDRAWAL = 850000;
-const FEE_PERCENTAGE = 5;
+const FEE_PERCENTAGE = 5; // Frais de retrait (5%)
 const WITHDRAWAL_START_HOUR = 8; // Heure de début des retraits (8h)
-const WITHDRAWAL_END_HOUR = 22;  // Heure de fin des retraits (20h)
+const WITHDRAWAL_END_HOUR = 22;  // Heure de fin des retraits (22h)
 
 // ======== VARIABLES GLOBALES ========
 let currentBalance = 0;
@@ -416,7 +416,7 @@ function updateWithdrawalSummary() {
     
     // Affichage du résumé si un montant est saisi
     if (amount > 0) {
-        const fees = Math.round(amount * FEE_PERCENTAGE);
+        const fees = Math.round(amount * FEE_PERCENTAGE / 100); // Calcul des frais (5%)
         const totalAmount = amount - fees;
 
         document.getElementById('requested-amount').textContent = formatAmount(amount);
@@ -495,7 +495,7 @@ async function processWithdrawal() {
     }
 
     // Calcul des frais et montants
-    const fees = Math.round(amount * FEE_PERCENTAGE);
+    const fees = Math.round(amount * FEE_PERCENTAGE / 100); // Calcul des frais (5%)
     const totalAmount = amount - fees;
     const newBalance = currentBalance - amount;
 
